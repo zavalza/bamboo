@@ -26,6 +26,7 @@ defmodule Bamboo.MandrillAdapter do
   @behaviour Bamboo.Adapter
 
   import Bamboo.ApiError
+  import Bamboo.Response, only: [new_response: 1]
 
   def deliver(email, config) do
     api_key = get_key(config)
@@ -37,7 +38,7 @@ defmodule Bamboo.MandrillAdapter do
         filtered_params = params |> Poison.decode! |> Map.put("key", "[FILTERED]")
         raise_api_error(@service_name, response, filtered_params)
       {:ok, status, headers, response} ->
-        %{status_code: status, headers: headers, body: response}
+        new_response(status_code: status, headers: headers, body: response)
       {:error, reason} ->
         raise_api_error(inspect(reason))
     end

@@ -25,6 +25,7 @@ defmodule Bamboo.MailgunAdapter do
 
   alias Bamboo.Email
   import Bamboo.ApiError
+  import Bamboo.Response, only: [new_response: 1]
 
   def deliver(email, config) do
     body = email |> to_mailgun_body |> Plug.Conn.Query.encode
@@ -33,7 +34,7 @@ defmodule Bamboo.MailgunAdapter do
       {:ok, status, _headers, response} when status > 299 ->
         raise_api_error(@service_name, response, body)
       {:ok, status, headers, response} ->
-        %{status_code: status, headers: headers, body: response}
+        new_response(status_code: status, headers: headers, body: response)
       {:error, reason} ->
         raise_api_error(inspect(reason))
     end
