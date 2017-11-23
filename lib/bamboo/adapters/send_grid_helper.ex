@@ -15,6 +15,7 @@ defmodule Bamboo.SendGridHelper do
   @id_size 36
   @field_name :send_grid_template
   @custom_args :custom_args
+  @categories :categories
 
   @doc """
   Specify a custom argument values that are specific to the entire send that will be carried along with the email and its activity data.
@@ -71,6 +72,26 @@ defmodule Bamboo.SendGridHelper do
     else
       raise "expected the tag parameter to be of type binary, got #{tag}"
     end
+  end
+
+  @doc """
+  An array of category names for this email. A maximum of 10 categories can be assigned to an email.
+  Duplicate categories will be ignored and only unique entries will be sent. 
+  
+  ## Example
+ 
+      email
+      |> with_categories("campaign-12345")
+  """
+  def with_categories(email, categories) when is_list(categories) do
+    categories = Map.get(email.private, @categories, []) ++ categories
+    |> MapSet.new
+    |> MapSet.to_list
+    email
+    |> Email.put_private(@categories, Enum.slice(categories, 0, 10))
+  end
+  def with_categories(email, categories) do
+    raise "expected a list of category strings"
   end
 
   defp set_template(template, template_id) do
